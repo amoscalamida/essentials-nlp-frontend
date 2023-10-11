@@ -7,20 +7,26 @@
   "updateContentCommand": "npm install",
   "postCreateCommand": "",
   "postAttachCommand": {
-    "server": "npm start"
+    "server": "npm start; npx tailwindcss -i ./src/index.css -o ./src/dist/output.css --watch"
   },
   "customizations": {
     "codespaces": {
       "openFiles": [
         "src/App.js"
       ]
-    }
+	},
+	"vscode": {
+		"extensions": [
+			"GitHub.copilot",
+			"bradlc.vscode-tailwindcss"
+		]
+	}
   },
   "portsAttributes": {
-    "3000": {
-      "label": "Application",
-      "onAutoForward": "openPreview"
-    }
-  },
+	"3000": {
+		"label": "Development Server",
+		"onAutoForward": "openPreview"
+	}
+},
   "forwardPorts": [3000]
 }
