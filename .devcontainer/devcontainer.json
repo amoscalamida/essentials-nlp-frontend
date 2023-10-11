@@ -25,7 +25,8 @@
   "portsAttributes": {
 	"3000": {
 		"label": "Development Server",
-		"onAutoForward": "openPreview"
+		"onAutoForward": "openPreview",
+    "visibility": "public"
 	}
 },
   "forwardPorts": [3000]
