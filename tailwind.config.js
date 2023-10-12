@@ -5,8 +5,11 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Graphik', 'sans-serif'],
+        sans: ['freight-sans-pro', 'Graphik', 'sans-serif'],
         serif: ['Merriweather', 'serif'],
+      },
+      colors: {
+        sand: { 500: "#EBE3C9" },
       }
     },
   },
