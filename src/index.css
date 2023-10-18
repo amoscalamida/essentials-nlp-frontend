@@ -3,3 +3,124 @@
 @tailwind utilities;
 
 @import url("https://use.typekit.net/ukd3wog.css");
+
+html {
+    @apply bg-sand-500;
+}
+
+.blob {
+    /* Transition for left top, properties and width, height */
+    transition: width 0.5s, height 0.5s, left 1s, top 1s, background-color 1s;
+}
+
+.blob-container {
+    transition: left 0.5s, top 0.5s;
+    height: 100px;
+}
+
+.blob-container.animate-blobs-auto {
+    left: calc(50% - 500px) !important;
+}
+
+/** animate the two .blobs inside .blob-container with a random pattern that resemlbes a loading animation */
+.blob-container.animate-blobs-auto .blob:nth-child(1) {
+    animation: animate-blob-1 5s  ease-in-out both infinite;
+}
+
+.blob-container.animate-blobs-auto .blob:nth-child(2) {
+    animation: animate-blob-2 5s ease-in-out both infinite;
+}
+
+/** subtle animation using the height and with as well as margin-left and margin-top to animate the blob
+    The animation should be top-right small (100px) -> move to bottom left big (200px) -> move to top right small for the first blob
+    for the second blob it should be the opposite
+*/
+
+@keyframes animate-blob-1 {
+    0% {
+        width: 100px;
+        height: 100px;
+        margin-left: 100px;
+        margin-top: 0px;
+        z-index: 5;
+    }
+    25% {
+        width: 150px;
+        height: 200px;
+        margin-left: 250px;
+        margin-top: 0px;
+        z-index: 5;
+    }
+    40% {
+        z-index: 1;
+    }
+    50% {
+        width: 100px;
+        height: 100px;
+        margin-left: 100px;
+        margin-top: 0px;
+        z-index: 1;
+    }
+    
+    75% {
+        width: 150px;
+        height: 150px;
+        margin-left: 255px;
+        margin-top: 0px;
+        z-index: 5;
+    }
+    90% {
+        z-index: 1;
+    }
+    100% {
+        width: 100px;
+        height: 100px;
+        margin-left: 100px;
+        margin-top: 0px;
+        z-index: 1;
+    }
+}
+
+@keyframes animate-blob-2 {
+    0% {
+        width: 150px;
+        height: 200px;
+        margin-left: 0px;
+        margin-top: -100px;
+        z-index: 1;
+    }
+    25% {
+        width: 120px;
+        height: 80px;
+        margin-left: -300px;
+        margin-top: 0px;
+        z-index: 1;
+    }
+    40% {
+        z-index: 5;
+    }
+    50% {
+        width: 150px;
+        height: 200px;
+        margin-left: 0px;
+        margin-top: -100px;
+        z-index: 5;
+    }
+    75% {
+        width: 140px;
+        height: 180px;
+        margin-left: -400px;
+        margin-top: 0px;
+        z-index: 1;
+    }
+    90% {
+        z-index: 5;
+    }
+    100% {
+        width: 150px;
+        height: 200px;
+        margin-left: 0px;
+        margin-top: -100px;
+        z-index: 5;
+    }
+}
