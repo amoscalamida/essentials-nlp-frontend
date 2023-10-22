@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { cantonal_coats_of_arms } from './resultResources';
 import { BlobsModern } from './Blobs';
+
 import axios from 'axios';
 
 const codespaceContainer = "sturdy-space-invention-5vq9px9r969fvx7"
@@ -12,7 +13,7 @@ function MainContent() {
     const [animateBlobs, setAnimateBlobs] = useState("none");
     const [resultProps, setResultProps] = useState({});
     const [userInput, setUserInput] = useState("");
-
+    const [error, setError] = useState(false);
     const [currentStatus, setCurrentStatus] = useState({ status: "Idle", statusColor: "gray" });
 
     const defaultBlobProps = [
@@ -45,7 +46,6 @@ function MainContent() {
         }
     }, [input, thinking, result]);
 
-
     const navigateTo = (page) => {
         if (page === 'home') {
             setInput(true);
@@ -64,8 +64,11 @@ function MainContent() {
 
     const submitText = () => {
 
-        // sanitize user input
-        const sanitizedInput = userInput.replace(/[^a-zA-Z ]/g, "").toLowerCase();
+        // reset error
+        setError(null);
+
+        // sanitize user input (remove special characters but not umlaute)
+        const sanitizedInput = userInput.replace(/[^a-zA-ZäöüÄÖÜ ]/g, "");
         userInput !== sanitizedInput && setUserInput(sanitizedInput);
 
         navigateTo('thinking');
@@ -78,27 +81,37 @@ function MainContent() {
             }
         });
 
-        axiosRequest.post("https://" + codespaceContainer + "-5000.app.github.dev/model/predict", { "text": userInput })
-            .then((response) => {
-                console.log(response);
+        axiosRequest.post(
+            `https://${codespaceContainer}-5000.app.github.dev/model/predict`,
+            { "text": userInput }).then(
+                (response) => {
+                    console.log(response);
 
-                const canton = response.data.canton;
-                const certainty = response.data.certainty;
+                    const canton = response.data.canton;
+                    const certainty = response.data.certainty;
 
-                const blobProps = cantonal_coats_of_arms[canton].blob_properties;
-                setCurrentStatus({ status: "Completed", statusColor: "#0F8125" });
+                    const blobProps = cantonal_coats_of_arms[canton].blob_properties;
+                    setTimeout(() => {
+                        setCurrentStatus({ status: "Completed", statusColor: "#0F8125" });
+                        setResultProps({
+                            "design": cantonal_coats_of_arms[canton],
+                            "certainty": certainty
+                        });
+                        setBlobProps(blobProps);
+                        navigateTo('result');
+                    }, 2000);
+                }).catch((error) => {
+                    console.log(error);
 
-                setResultProps({
-                    "design": cantonal_coats_of_arms[canton],
-                    "certainty": certainty
+                    setTimeout(() => {
+                        setError({
+                            "message": error.message,
+                            "status": error.code,
+                            "color": "#E8423F"
+                        })
+                        navigateTo('home');
+                    }, 2000);
                 });
-                setBlobProps(blobProps);
-                navigateTo('result');
-
-            }).onError((error) => {
-                console.log(error);
-                navigateTo('home');
-            });
 
 
     }
@@ -111,7 +124,7 @@ function MainContent() {
             {result && <Result resultProps={resultProps} input={userInput} />}
             {input && <div className='flex justify-end'>
                 <button
-                    className={`${userInput.length > 3 ? "opacity-100" : "opacity-0"} transition-opacity border border-slate-600 text-slate-600 px-4 py-2 rounded-xl mt-6`}
+                    className={`${userInput.length > 3 ? "opacity-100" : "opacity-0"} hover:opacity-50 transition-opacity border border-slate-600 text-black px-4 py-2 rounded-xl mt-6`}
                     onClick={submitText}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 inline mr-2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
@@ -120,6 +133,12 @@ function MainContent() {
                 </button>
             </div>}
             <BlobsModern blobs={blobProps} canvasPosition={canvasPosition} animateBlobs={animateBlobs} />
+            {error && <div className='absolute top-0 right-0 border border-slate-600 p-4 rounded-xl mt-6 mr-6 bg-transparent text-light text-xl    
+                '>
+                <h3 className='text-md font-medium' style={{ color: error.color }}>{error.message}</h3>
+                <p className='text-sm font-medium '>{error.status}</p>
+
+            </div>}
         </div>
     );
 
@@ -161,16 +180,40 @@ function Thinking() {
     );
 }
 
-function Result({ resultProps }) {
+function Result({ resultProps, input }) {
     const { design, certainty } = resultProps;
     const { name, svg, main_color, blob_properties } = design || {};
 
-    // add a fade in to the svg after the blob animation is done
+    // add the possibility to capture the actual canton as provided by the user
+    const [userCanton, setUserCanton] = useState(null);
+    const [userCantonVisible, setUserCantonVisible] = useState(false);
 
+    // add a fade in to the svg after the blob animation is done
     setTimeout(() => {
         const svg = document.getElementById("canton-image");
         svg.style.opacity = 1;
     }, 800);
+
+    const submitUserCanton = () => {
+        // send the user input to the backend using axios
+        const axiosRequest = axios.create({
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        axiosRequest.post(
+            `https://${codespaceContainer}-5000.app.github.dev/data/save`,
+            { "text": input, "canton": userCanton }).then(
+                (response) => {
+                    console.log(response);
+                    setUserCantonVisible(false);
+
+                }).catch((error) => {
+                    console.log(error);
+                });
+    }
 
     return (
         <div className='flex flex-col gap-y-6 md:flex-row w-full pl-0 md:pl-10 md:pt-28 pt-24'>
@@ -182,6 +225,42 @@ function Result({ resultProps }) {
             <div className='flex flex-col w-full text-center md:text-left'>
                 <p className='text-xl font-medium  mb-0'>We are {Math.round(certainty * 100)}% certain, that you are speaking</p>
                 <p className='text-4xl font-medium' style={{ color: main_color }}>{name} dialect</p>
+                <>
+                    {(!userCanton || userCantonVisible) && <button
+                        className={`w-fit border border-slate-600 hover:opacity-50 text-black px-4 py-2 rounded-xl mt-6 ${userCantonVisible ? "bg-black text-white" : "bg-transparent"} transition-all ease-in-out duration-500}`}
+                        onClick={() => setUserCantonVisible(!userCantonVisible)}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2 inline">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                        </svg>
+
+                        Did we get it wrong?
+                    </button>}
+                    {userCantonVisible && <div className='flex flex-col mt-6'>
+                        <p className='text-xl font-medium mb-0'>What dialect is the text you typed?</p>
+                        <div className='flex flex-row'>
+                            <select className='border-b bg-transparent border-slate-600 text-black px-4 py-2 mt-6 focus-within:outline-none focus-visible:outline-none' onChange={(e) => setUserCanton(e.target.value)}>
+                                <option value="" disabled selected>Plase select a canton</option>
+
+                                {Object.entries(cantonal_coats_of_arms).map(([key, value]) => {
+                                    if (value.name === name) {return null};
+                                    return <option key={key} value={key}>{value.name}</option>
+                                })}
+                            </select>
+                            {userCanton && <button className='w-fit border hover:opacity-50 transition-opacity border-slate-600 text-black px-4 py-2 rounded-xl mt-6 ml-4' onClick={submitUserCanton}>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 inline mr-2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                </svg>
+
+                                Confirm
+                            </button>}
+                        </div>
+                    </div>}
+                    {(userCanton && !userCantonVisible) && <div className='flex flex-col mt-6'>
+                        <p className='text-xl font-medium mb-0'>Thank you for your feedback!</p>
+                        <p className='text-lg font-medium mb-0'>We will use it to improve our model.</p>
+                    </div>
+                    }
+                </>
             </div>
         </div>
     );
