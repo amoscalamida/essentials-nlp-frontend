@@ -14,20 +14,22 @@
       "openFiles": [
         "src/App.js"
       ]
-	},
-	"vscode": {
-		"extensions": [
-			"GitHub.copilot",
-			"bradlc.vscode-tailwindcss"
-		]
-	}
+    },
+    "vscode": {
+      "extensions": [
+        "GitHub.copilot",
+        "bradlc.vscode-tailwindcss"
+      ]
+    }
   },
   "portsAttributes": {
-	"3000": {
-		"label": "Development Server",
-		"onAutoForward": "openPreview",
-    "visibility": "public"
-	}
-},
-  "forwardPorts": [3000]
+    "3000": {
+      "label": "Development Server",
+      "onAutoForward": "openPreview",
+      "visibility": "public"
+    }
+  },
+  "forwardPorts": [
+    3000
+  ]
 }

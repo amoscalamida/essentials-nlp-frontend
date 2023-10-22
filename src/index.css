@@ -11,6 +11,7 @@ html {
 .blob {
     /* Transition for left top, properties and width, height */
     transition: width 0.5s, height 0.5s, left 1s, top 1s, background-color 1s;
+    will-change: transform;
 }
 
 .blob-container {
@@ -18,9 +19,6 @@ html {
     height: 100px;
 }
 
-.blob-container.animate-blobs-auto {
-    left: calc(50% - 500px) !important;
-}
 
 /** animate the two .blobs inside .blob-container with a random pattern that resemlbes a loading animation */
 .blob-container.animate-blobs-auto .blob:nth-child(1) {

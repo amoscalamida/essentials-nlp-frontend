@@ -10,6 +10,8 @@ module.exports = {
       },
       colors: {
         sand: { 500: "#EBE3C9" },
+        brilliantBlue: { 500: "#0fbcf9" },
+        powerfulOrange: { 500: "#ffa801" },
       }
     },
   },

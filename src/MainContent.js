@@ -1,19 +1,26 @@
 import React, { useState } from 'react';
+import { cantonal_coats_of_arms } from './resultResources';
+import { BlobsModern } from './Blobs';
+import axios from 'axios';
 
+const codespaceContainer = "sturdy-space-invention-5vq9px9r969fvx7"
 function MainContent() {
     // have the blobs in the background and then in the foreground switch between the input form / thinking / result
     const [input, setInput] = useState(true);
     const [thinking, setThinking] = useState(false);
     const [result, setResult] = useState(false);
     const [animateBlobs, setAnimateBlobs] = useState("none");
+    const [resultProps, setResultProps] = useState({});
+    const [userInput, setUserInput] = useState("");
 
-    // Zurich Blue # 0F05A0
+    const [currentStatus, setCurrentStatus] = useState({ status: "Idle", statusColor: "gray" });
+
     const defaultBlobProps = [
         { color: '#ffa801', position: { x: 40, y: 80 }, size: 100 }, // orange
         { color: '#0fbcf9', position: { x: -20, y: 10 }, size: 150 }, // blue
     ];
 
-    const defaultCanvasPosition = { position: "left", offsetTop: 100, offsetLeft: 0 };
+    const defaultCanvasPosition = { position: "left", offsetTop: 200, offsetLeft: 0 };
 
     const [blobProps, setBlobProps] = useState(defaultBlobProps);
     const [canvasPosition, setCanvasPosition] = useState(defaultCanvasPosition);
@@ -22,144 +29,124 @@ function MainContent() {
     React.useEffect(() => {
         if (input) {
             setBlobProps(defaultBlobProps);
-            setCanvasPosition(defaultCanvasPosition);
+            setCanvasPosition({ position: "left", offsetTop: 100, offsetLeft: 0 });
             setAnimateBlobs("mouse");
         } else if (thinking) {
+            setCurrentStatus({ status: "Processing", statusColor: "#0fbcf9" });
             setBlobProps([
                 { color: '#0fbcf9', position: { x: 0, y: 0 }, size: 250 }, // blue
                 { color: '#ffa801', position: { x: 0, y: 0 }, size: 100 }, // orange
             ]);
-            setCanvasPosition({ position: "center", offsetTop: 0, offsetLeft: -100 });
+            setCanvasPosition({ position: "center", offsetTop: 200, offsetLeft: -200 });
             setAnimateBlobs("auto");
         } else if (result) {
-            setBlobProps([
-                { color: '#FFFFFF', position: { x: 40, y: 80 }, size: 150 }, // white
-                { color: '#0F05A0BB', position: { x: -20, y: 10 }, size: 150 }, // blue
-            ]);
             setCanvasPosition(defaultCanvasPosition);
             setAnimateBlobs("none");
         }
     }, [input, thinking, result]);
 
+
+    const navigateTo = (page) => {
+        if (page === 'home') {
+            setInput(true);
+            setThinking(false);
+            setResult(false);
+        } else if (page === 'thinking') {
+            setInput(false);
+            setThinking(true);
+            setResult(false);
+        } else if (page === 'result') {
+            setInput(false);
+            setThinking(false);
+            setResult(true);
+        }
+    }
+
+    const submitText = () => {
+
+        // sanitize user input
+        const sanitizedInput = userInput.replace(/[^a-zA-Z ]/g, "").toLowerCase();
+        userInput !== sanitizedInput && setUserInput(sanitizedInput);
+
+        navigateTo('thinking');
+
+        // send the user input to the backend using axios
+        const axiosRequest = axios.create({
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        axiosRequest.post("https://" + codespaceContainer + "-5000.app.github.dev/model/predict", { "text": userInput })
+            .then((response) => {
+                console.log(response);
+
+                const canton = response.data.canton;
+                const certainty = response.data.certainty;
+
+                const blobProps = cantonal_coats_of_arms[canton].blob_properties;
+                setCurrentStatus({ status: "Completed", statusColor: "#0F8125" });
+
+                setResultProps({
+                    "design": cantonal_coats_of_arms[canton],
+                    "certainty": certainty
+                });
+                setBlobProps(blobProps);
+                navigateTo('result');
+
+            }).onError((error) => {
+                console.log(error);
+                navigateTo('home');
+            });
+
+
+    }
+
     return (
         <div className='flex flex-col w-full z-0 relative'>
-            {input && <InputForm />}
-            {thinking && <Thinking />}
-            {result && <Result />}
-            <div className='flex justify-end'>
-                <button className='bg-slate-600 text-white px-4 py-2 rounded-lg mt-6' onClick={() => {
-                    setInput(false);
-                    setThinking(true);
-                    setTimeout(() => {
-                        setThinking(false);
-                        setResult(true);
-                    }, 3000);
-                }}>Submit</button>
-            </div>
+            {input && <InputForm userInput={userInput} setUserInput={setUserInput} />}
+            {(userInput && !input) && <UserInputPreview userInput={userInput} currentStatus={currentStatus} />}
+            {thinking && <Thinking input={userInput} />}
+            {result && <Result resultProps={resultProps} input={userInput} />}
+            {input && <div className='flex justify-end'>
+                <button
+                    className={`${userInput.length > 3 ? "opacity-100" : "opacity-0"} transition-opacity border border-slate-600 text-slate-600 px-4 py-2 rounded-xl mt-6`}
+                    onClick={submitText}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 inline mr-2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                    </svg>
+                    Ask the AI
+                </button>
+            </div>}
             <BlobsModern blobs={blobProps} canvasPosition={canvasPosition} animateBlobs={animateBlobs} />
         </div>
     );
 
 }
 
-const BlobsModern = ({ blobs, canvasPosition, animateBlobs }) => {
+function UserInputPreview({ userInput, currentStatus }) {
 
-
-    // reset blob positions when blobs change
-    React.useEffect(() => {
-        setBlobProps(blobs);
-    }, [blobs]);
-
-    const [awareBlobs, setBlobProps] = useState(blobs);
-
-    // animate blobs can have three values: none, auto, mouse
-    // none: no animation
-    // auto: blobs animate randomly
-    // mouse: blobs animate based on mouse position
-
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-    const moveBlobs = (blob, direction) => {
-        return {
-            ...blob,
-            position: {
-                x: blob.position.x - (direction.x * 0.1),
-                y: blob.position.y - (direction.y * 0.1)
-            }
-        };
-    }
-
-    // 5. Update the blob position
-    const updateBlobPosition = (blob, mousePosition) => {
-
-        const direction = {
-            // direction relative to center of window
-            x: window.innerWidth / 2 - mousePosition.x,
-            y: window.innerHeight / 2 - mousePosition.y
-        };
-        return moveBlobs(blob, direction);
-    }
-
-    // 7. Update the blob positions
-    const updateBlobPositions = (awareBlobs, mousePosition) => {
-        return awareBlobs.map(blob => updateBlobPosition(blob, mousePosition));
-    }
-
-    React.useEffect(() => {
-        if (animateBlobs === 'mouse') {
-            setBlobProps(updateBlobPositions(awareBlobs, mousePosition));
-        }
-    }, [mousePosition]);
-
-    // 9. Update the blob positions on mouse move
-    React.useEffect(() => {
-        if (animateBlobs === 'mouse') {
-            // make the mouse move smoother (less updates)
-
-            const updateMousePositionDebounced = debounce((event) => setMousePosition({ x: event.clientX, y: event.clientY }), 500);
-            window.addEventListener('mousemove', updateMousePositionDebounced);
-            return () => window.removeEventListener('mousemove', updateMousePositionDebounced);
-        }
-    }, [animateBlobs]);
-
-    function debounce(func, timeout = 300) {
-        let timer;
-        return (...args) => {
-            clearTimeout(timer);
-            timer = setTimeout(() => { func.apply(this, args); }, timeout);
-        };
-    }
+    const { status, statusColor } = currentStatus || {};
 
     return (
-        <div className={`absolute w-full max-h-full -z-10 blob-container ${animateBlobs === 'auto' ? 'animate-blobs-auto' : ''}`} style={{
-            top: canvasPosition.offsetTop,
-            left: canvasPosition.offsetLeft,
-        }}>
-            {awareBlobs.map((blob, index) => (<div
-                key={index}
-                className={`blob blur-xl inline-block relative rounded-full`}
-                style={{
-                    width: `${blob.size}px`,
-                    height: `${blob.size}px`,
-                    backgroundColor: blob.color || '#ffa801', // Default color
-                    transitionDelay: `${index * 0.2}s`, // Delay each blob's animation
-
-                    // position as offset from center if position is center, else position it left
-                    left: canvasPosition.position === 'center' ? `calc(50% - ${blob.position.x}px)` : `calc(10px + ${blob.position.x}px)`,
-                    top: canvasPosition.position === 'center' ? `calc(50% - ${blob.position.y}px)` : `calc(10px + ${blob.position.y}px)`,
-                }}></div>))}
+        <div className="h-24">
+            <p className="text-lg font-medium">Your Input <span className='ml-3 border rounded-full font-normal px-3 text-sm leading-3' style={{ color: statusColor, borderColor: statusColor }}>{status}</span></p>
+            <div className='mt-2 py-3 border-b border-t border-slate-600 p-0 bg-transparent text-light text-lg'>
+                {userInput}
+            </div>
         </div>
     );
+}
 
-};
-
-function InputForm() {
+function InputForm({ userInput, setUserInput }) {
 
     return (
         <div className='flex flex-col w-full sm:pl-12 md:pl-56 pt-20 sm:pt-40'>
             <p className='text-2xl font-medium mb-0'>Tell us how you talk</p>
             <p className='mb-6 text-xl font-medium'>Our AI will predict which dialect you speak</p>
-            <textarea className='border-b border-slate-600 p-2 bg-transparent focus-visible:border-b-2 focus-visible:outline-none' />
+            <div contentEditable onInput={(e) => setUserInput(e.target.innerText)} className='border-b border-slate-600 py-2 bg-transparent focus-visible:border-b-2 focus-visible:outline-none text-light text-xl md:text-2xl h-auto' >
+            </div>
         </div>
     );
 }
@@ -174,11 +161,28 @@ function Thinking() {
     );
 }
 
-function Result() {
+function Result({ resultProps }) {
+    const { design, certainty } = resultProps;
+    const { name, svg, main_color, blob_properties } = design || {};
+
+    // add a fade in to the svg after the blob animation is done
+
+    setTimeout(() => {
+        const svg = document.getElementById("canton-image");
+        svg.style.opacity = 1;
+    }, 800);
+
     return (
-        <div className='flex flex-col w-full sm:pl-40 md:pl-80 md:pt-36 sm:pt-72'>
-            <p className='text-xl font-medium  mb-0'>We are 76% certain, that you are speaking</p>
-            <p className='text-4xl font-medium text-blue-500'>Zurich dialect</p>
+        <div className='flex flex-col gap-y-6 md:flex-row w-full pl-0 md:pl-10 md:pt-28 pt-24'>
+            <div className='flex justify-center'>
+                <div className='w-1/2'>
+                    <img src={svg} alt={name} className='transition-opacity ease-in-out opacity-0 duration-500' id='canton-image' />
+                </div>
+            </div>
+            <div className='flex flex-col w-full text-center md:text-left'>
+                <p className='text-xl font-medium  mb-0'>We are {Math.round(certainty * 100)}% certain, that you are speaking</p>
+                <p className='text-4xl font-medium' style={{ color: main_color }}>{name} dialect</p>
+            </div>
         </div>
     );
 }
