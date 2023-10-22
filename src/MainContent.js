@@ -222,20 +222,20 @@ function Result({ resultProps, input }) {
                     <img src={svg} alt={name} className='transition-opacity ease-in-out opacity-0 duration-500' id='canton-image' />
                 </div>
             </div>
-            <div className='flex flex-col w-full text-center md:text-left'>
+            <div className='flex flex-col w-full text-center md:text-left items-center'>
                 <p className='text-xl font-medium  mb-0'>We are {Math.round(certainty * 100)}% certain, that you are speaking</p>
                 <p className='text-4xl font-medium' style={{ color: main_color }}>{name} dialect</p>
                 <>
                     {(!userCanton || userCantonVisible) && <button
                         className={`w-fit border border-slate-600 hover:opacity-50 text-black px-4 py-2 rounded-xl mt-6 ${userCantonVisible ? "bg-black text-white" : "bg-transparent"} transition-all ease-in-out duration-500}`}
-                        onClick={() => setUserCantonVisible(!userCantonVisible)}>
+                        onClick={() => setUserCantonVisible(true)}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2 inline">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                         </svg>
 
                         Did we get it wrong?
                     </button>}
-                    {userCantonVisible && <div className='flex flex-col mt-6'>
+                    {userCantonVisible && <div className='flex flex-col mt-6 justify-center'>
                         <p className='text-xl font-medium mb-0'>What dialect is the text you typed?</p>
                         <div className='flex flex-row'>
                             <select className='border-b bg-transparent border-slate-600 text-black px-4 py-2 mt-6 focus-within:outline-none focus-visible:outline-none' onChange={(e) => setUserCanton(e.target.value)}>
