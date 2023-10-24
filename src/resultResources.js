@@ -7,6 +7,7 @@ const positions = {
 export const cantonal_coats_of_arms = {
     "lu": {
         "name": "Luzern",
+        "id": "lu",
         "svg": "https://upload.wikimedia.org/wikipedia/commons/6/66/Wappen_Luzern_matt.svg",
         "main_color": "#248BCC",
         "blob_properties": [
@@ -15,8 +16,31 @@ export const cantonal_coats_of_arms = {
         ]
     },
 
+    "bs": {
+        "name": "Basel",
+        "id": "bs",
+        "svg": "https://upload.wikimedia.org/wikipedia/commons/7/7d/Wappen_Basel-Stadt_matt.svg",
+        "main_color": "#000000",
+        "blob_properties": [
+            { color: '#000000', position: positions.diagonal.bottomLeft, size: 150 }, // black
+            { color: '#FFFFFF', position: positions.diagonal.topRight, size: 150 } // white
+        ]
+    },
+
+    "be": {
+        "name": "Bern",
+        "id": "be",
+        "svg": "https://upload.wikimedia.org/wikipedia/commons/4/47/Wappen_Bern_matt.svg",
+        "main_color": "#E7423F",
+        "blob_properties": [
+            { color: '#E7423F', position: positions.vertical.top, size: 150 }, // blue
+            { color: '#FFD72E', position: positions.vertical.bottom, size: 150 } // white
+        ]
+    },
+
     "zh": {
         "name": "Zürich",
+        "id": "zh",
         "svg": "https://upload.wikimedia.org/wikipedia/commons/5/5a/Wappen_Z%C3%BCrich_matt.svg",
         "main_color": "#0F05A0",
         "blob_properties": [
@@ -27,6 +51,7 @@ export const cantonal_coats_of_arms = {
 
     "so": {
         "name": "Solothurn",
+        "id": "so",
         "svg": "https://upload.wikimedia.org/wikipedia/commons/b/b7/Wappen_Solothurn_matt.svg",
         "main_color": "#E8423F",
         "blob_properties": [

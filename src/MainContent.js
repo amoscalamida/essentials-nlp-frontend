@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { cantonal_coats_of_arms } from './resultResources';
 import { BlobsModern } from './Blobs';
 
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 const codespaceContainer = "sturdy-space-invention-5vq9px9r969fvx7"
 function MainContent() {
@@ -67,9 +67,8 @@ function MainContent() {
         // reset error
         setError(null);
 
-        // sanitize user input (remove special characters but not umlaute)
-        const sanitizedInput = userInput.replace(/[^a-zA-ZäöüÄÖÜ ]/g, "");
-        userInput !== sanitizedInput && setUserInput(sanitizedInput);
+        // trim user input
+        setUserInput(userInput.trim());
 
         navigateTo('thinking');
 
@@ -87,7 +86,7 @@ function MainContent() {
                 (response) => {
                     console.log(response);
 
-                    const canton = response.data.canton;
+                    const canton = response.data.canton.toLowerCase();
                     const certainty = response.data.certainty;
 
                     const blobProps = cantonal_coats_of_arms[canton].blob_properties;
@@ -103,12 +102,22 @@ function MainContent() {
                 }).catch((error) => {
                     console.log(error);
 
+                    
                     setTimeout(() => {
-                        setError({
-                            "message": error.message,
-                            "status": error.code,
-                            "color": "#E8423F"
-                        })
+                        if (typeof(error) === AxiosError.ERR_NETWORK) {
+                            setError({
+                                "message": "Verify that the back-end server is reachable",
+                                "status": error.code,
+                                "color": "#ffa801"
+                            })
+                        } else {
+                            setError({
+                                "message": error.message,
+                                "status": error.code,
+                                "color": "#E8423F"
+                            })
+                        }
+                        
                         navigateTo('home');
                     }, 2000);
                 });
@@ -182,7 +191,7 @@ function Thinking() {
 
 function Result({ resultProps, input }) {
     const { design, certainty } = resultProps;
-    const { name, svg, main_color, blob_properties } = design || {};
+    const { name, id, svg, main_color } = design || {};
 
     // add the possibility to capture the actual canton as provided by the user
     const [userCanton, setUserCanton] = useState(null);
@@ -193,6 +202,29 @@ function Result({ resultProps, input }) {
         const svg = document.getElementById("canton-image");
         svg.style.opacity = 1;
     }, 800);
+
+    const confirmCorrectPrediction = () => {
+        
+        // send the user input to the backend using axios
+        const axiosRequest = axios.create({
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        axiosRequest.post(
+            `https://${codespaceContainer}-5000.app.github.dev/data/save`,
+            { "text": input, "canton": id }).then(
+                (response) => {
+                    console.log(response);
+                    setUserCantonVisible(false);
+                    setUserCanton(id);
+                }).catch((error) => {
+                    console.log(error);
+                });
+        
+    }
 
     const submitUserCanton = () => {
         // send the user input to the backend using axios
@@ -226,23 +258,28 @@ function Result({ resultProps, input }) {
                 <p className='text-xl font-medium  mb-0'>We are {Math.round(certainty * 100)}% certain, that you are speaking</p>
                 <p className='text-4xl font-medium' style={{ color: main_color }}>{name} dialect</p>
                 <>
-                    {(!userCanton || userCantonVisible) && <button
-                        className={`w-fit border border-slate-600 hover:opacity-50 text-black px-4 py-2 rounded-xl mt-6 ${userCantonVisible ? "bg-black text-white" : "bg-transparent"} transition-all ease-in-out duration-500}`}
-                        onClick={() => setUserCantonVisible(true)}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2 inline">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                    {(!userCanton || userCantonVisible) && <div className='flex gap-2'><button className='w-fit border hover:opacity-50 transition-opacity border-slate-600 text-black px-2 py-1 rounded-xl mt-6 ml-4' onClick={confirmCorrectPrediction}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 inline mr-2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                         </svg>
 
-                        Did we get it wrong?
-                    </button>}
+                        Yes, that's right!
+                    </button><button
+                        className={`w-fit border border-slate-600 hover:opacity-50 text-black px-2 py-1 rounded-xl mt-6 ${userCantonVisible ? "bg-black text-white" : "bg-transparent"} transition-all ease-in-out duration-500}`}
+                        onClick={() => setUserCantonVisible(true)}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2 inline">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                            </svg>
+
+                            Did we get it wrong?
+                        </button></div>}
                     {userCantonVisible && <div className='flex flex-col mt-6 justify-center'>
                         <p className='text-xl font-medium mb-0'>What dialect is the text you typed?</p>
                         <div className='flex flex-row'>
-                            <select className='border-b bg-transparent border-slate-600 text-black px-4 py-2 mt-6 focus-within:outline-none focus-visible:outline-none' onChange={(e) => setUserCanton(e.target.value)}>
-                                <option value="" disabled selected>Plase select a canton</option>
-
+                            <select defaultValue="" placeholder="Plase select a canton" className='border-b bg-transparent border-slate-600 text-black px-4 py-2 mt-6 focus-within:outline-none focus-visible:outline-none' onChange={(e) => setUserCanton(e.target.value)}>
+                                <option value="" disabled>Please select a canton</option>
                                 {Object.entries(cantonal_coats_of_arms).map(([key, value]) => {
-                                    if (value.name === name) {return null};
+                                    if (value.name === name) { return null };
                                     return <option key={key} value={key}>{value.name}</option>
                                 })}
                             </select>
