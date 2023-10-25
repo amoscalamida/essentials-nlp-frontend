@@ -60,7 +60,7 @@ export const BlobsModern = ({ blobs, canvasPosition, animateBlobs }) => {
     }, [animateBlobs]);
 
     return (
-        <div className={`absolute w-full max-h-full flex -z-10 blob-container ${animateBlobs === 'auto' ? 'animate-blobs-auto' : ''}`} style={{
+        <div className={`absolute w-full max-h-full flex -z-10 -mt-8 md:mt-0 blob-container ${animateBlobs === 'auto' ? 'animate-blobs-auto' : ''}`} style={{
             top: canvasPosition.offsetTop,
             left: canvasPosition.offsetLeft,
         }}>

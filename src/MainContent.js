@@ -67,8 +67,11 @@ function MainContent() {
         // reset error
         setError(null);
 
-        // trim user input
-        setUserInput(userInput.trim());
+        // trim and remove new lines
+        let sanitizedInput = userInput.trim().replace(/(\r\n|\n|\r)/gm, "")
+        setUserInput(sanitizedInput);
+
+
 
         navigateTo('thinking');
 
@@ -82,7 +85,7 @@ function MainContent() {
 
         axiosRequest.post(
             `https://${codespaceContainer}-5000.app.github.dev/model/predict`,
-            { "text": userInput }).then(
+            { "text": sanitizedInput }).then(
                 (response) => {
                     console.log(response);
 
@@ -102,9 +105,9 @@ function MainContent() {
                 }).catch((error) => {
                     console.log(error);
 
-                    
+
                     setTimeout(() => {
-                        if (typeof(error) === AxiosError.ERR_NETWORK) {
+                        if (error === AxiosError.ERR_NETWORK) {
                             setError({
                                 "message": "Verify that the back-end server is reachable",
                                 "status": error.code,
@@ -117,7 +120,7 @@ function MainContent() {
                                 "color": "#E8423F"
                             })
                         }
-                        
+
                         navigateTo('home');
                     }, 2000);
                 });
@@ -125,10 +128,19 @@ function MainContent() {
 
     }
 
+    const newRequest = () => {
+        setUserInput("");
+        setError(null);
+        navigateTo('home');
+        const timeout = setTimeout(() =>
+            setResultProps({}), 200);
+
+    }
+
     return (
         <div className='flex flex-col w-full z-0 relative'>
             {input && <InputForm userInput={userInput} setUserInput={setUserInput} />}
-            {(userInput && !input) && <UserInputPreview userInput={userInput} currentStatus={currentStatus} />}
+            {(userInput && !input) && <UserInputPreview newRequest={newRequest} userInput={userInput} currentStatus={currentStatus} />}
             {thinking && <Thinking input={userInput} />}
             {result && <Result resultProps={resultProps} input={userInput} />}
             {input && <div className='flex justify-end'>
@@ -153,16 +165,31 @@ function MainContent() {
 
 }
 
-function UserInputPreview({ userInput, currentStatus }) {
+function UserInputPreview({ userInput, currentStatus, newRequest }) {
 
     const { status, statusColor } = currentStatus || {};
 
     return (
         <div className="h-24">
+            <div className='flex flex-row justify-between'>
             <p className="text-lg font-medium">Your Input <span className='ml-3 border rounded-full font-normal px-3 text-sm leading-3' style={{ color: statusColor, borderColor: statusColor }}>{status}</span></p>
-            <div className='mt-2 py-3 border-b border-t border-slate-600 p-0 bg-transparent text-light text-lg'>
-                {userInput}
+            <button className='w-fit border hover:opacity-50 transition-opacity border-slate-600 text-black px-2 py-1 rounded-xl text-sm' onClick={newRequest}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 inline mr-2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+
+
+                    Try a different text
+                </button>
             </div>
+            <div className='flex flex-row justify-between mt-2 py-3 border-b border-t border-slate-600 p-0 bg-transparent'>
+                <div className='text-light text-lg text-left'
+                >
+                    {userInput}
+                </div>
+
+            </div>
+
         </div>
     );
 }
@@ -173,7 +200,7 @@ function InputForm({ userInput, setUserInput }) {
         <div className='flex flex-col w-full sm:pl-12 md:pl-56 pt-20 sm:pt-40'>
             <p className='text-2xl font-medium mb-0'>Tell us how you talk</p>
             <p className='mb-6 text-xl font-medium'>Our AI will predict which dialect you speak</p>
-            <div contentEditable onInput={(e) => setUserInput(e.target.innerText)} className='border-b border-slate-600 py-2 bg-transparent focus-visible:border-b-2 focus-visible:outline-none text-light text-xl md:text-2xl h-auto' >
+            <div contentEditable spellCheck="false" autoCorrect="false" onInput={(e) => setUserInput(e.target.innerText)} className='border-b border-slate-600 py-2 bg-transparent focus-visible:border-b-2 focus-visible:outline-none text-light text-xl md:text-2xl h-auto' >
             </div>
         </div>
     );
@@ -204,7 +231,7 @@ function Result({ resultProps, input }) {
     }, 800);
 
     const confirmCorrectPrediction = () => {
-        
+
         // send the user input to the backend using axios
         const axiosRequest = axios.create({
             headers: {
@@ -223,7 +250,7 @@ function Result({ resultProps, input }) {
                 }).catch((error) => {
                     console.log(error);
                 });
-        
+
     }
 
     const submitUserCanton = () => {
@@ -248,14 +275,22 @@ function Result({ resultProps, input }) {
     }
 
     return (
-        <div className='flex flex-col gap-y-6 md:flex-row w-full pl-0 md:pl-10 md:pt-28 pt-24'>
+        <div className='flex flex-col gap-y-6 md:flex-row w-full pl-0 md:pl-10 md:pt-28 pt-16'>
             <div className='flex justify-center'>
                 <div className='w-1/2'>
                     <img src={svg} alt={name} className='transition-opacity ease-in-out opacity-0 duration-500' id='canton-image' />
                 </div>
             </div>
             <div className='flex flex-col w-full text-center md:text-left items-center'>
-                <p className='text-xl font-medium  mb-0'>We are {Math.round(certainty * 100)}% certain, that you are speaking</p>
+                {certainty < 0.5 && <div className='flex flex-row justify-center md:justify-start'>
+                    <div className=' text-powerfulOrange-500 px-2 py-1 rounded-xl mt-6 ml-4 border border-powerfulOrange-500'>
+                        <p className='text-sm font-medium'>Low certainty ({Math.round(certainty * 100)}%)</p>
+                    </div>
+                </div>}
+                <p className='text-xl font-medium  mb-0'>
+                    {certainty < 0.5 && "We are not sure, but you might speak"}
+                    {certainty >= 0.5 && "We are " + Math.round(certainty * 100) + "% certain, that you are speaking"}
+                </p>
                 <p className='text-4xl font-medium' style={{ color: main_color }}>{name} dialect</p>
                 <>
                     {(!userCanton || userCantonVisible) && <div className='flex gap-2'><button className='w-fit border hover:opacity-50 transition-opacity border-slate-600 text-black px-2 py-1 rounded-xl mt-6 ml-4' onClick={confirmCorrectPrediction}>
@@ -266,14 +301,14 @@ function Result({ resultProps, input }) {
                         Yes, that's right!
                     </button><button
                         className={`w-fit border border-slate-600 hover:opacity-50 text-black px-2 py-1 rounded-xl mt-6 ${userCantonVisible ? "bg-black text-white" : "bg-transparent"} transition-all ease-in-out duration-500}`}
-                        onClick={() => setUserCantonVisible(true)}>
+                        onClick={() => {setUserCantonVisible(true); setTimeout(() => document.getElementById("userCanton").scrollIntoView({behavior: "smooth"}), 1000)}}>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2 inline">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                             </svg>
 
                             Did we get it wrong?
                         </button></div>}
-                    {userCantonVisible && <div className='flex flex-col mt-6 justify-center'>
+                    {userCantonVisible && <div id={"userCanton"} className='flex flex-col mt-6 justify-center'>
                         <p className='text-xl font-medium mb-0'>What dialect is the text you typed?</p>
                         <div className='flex flex-row'>
                             <select defaultValue="" placeholder="Plase select a canton" className='border-b bg-transparent border-slate-600 text-black px-4 py-2 mt-6 focus-within:outline-none focus-visible:outline-none' onChange={(e) => setUserCanton(e.target.value)}>
