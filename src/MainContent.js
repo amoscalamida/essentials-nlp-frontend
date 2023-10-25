@@ -5,6 +5,8 @@ import { BlobsModern } from './Blobs';
 import axios, { AxiosError } from 'axios';
 
 const codespaceContainer = "sturdy-space-invention-5vq9px9r969fvx7"
+const backendUrl = process.env.API_URL == null ? `https://${codespaceContainer}-5000.app.github.dev` : process.env.API_URL;
+
 function MainContent() {
     // have the blobs in the background and then in the foreground switch between the input form / thinking / result
     const [input, setInput] = useState(true);
@@ -84,7 +86,7 @@ function MainContent() {
         });
 
         axiosRequest.post(
-            `https://${codespaceContainer}-5000.app.github.dev/model/predict`,
+            `${backendUrl}/model/predict`,
             { "text": sanitizedInput }).then(
                 (response) => {
                     console.log(response);
@@ -241,7 +243,7 @@ function Result({ resultProps, input }) {
         });
 
         axiosRequest.post(
-            `https://${codespaceContainer}-5000.app.github.dev/data/save`,
+            `${backendUrl}/data/save`,
             { "text": input, "canton": id }).then(
                 (response) => {
                     console.log(response);
@@ -263,7 +265,7 @@ function Result({ resultProps, input }) {
         });
 
         axiosRequest.post(
-            `https://${codespaceContainer}-5000.app.github.dev/data/save`,
+            `${backendUrl}/data/save`,
             { "text": input, "canton": userCanton }).then(
                 (response) => {
                     console.log(response);
