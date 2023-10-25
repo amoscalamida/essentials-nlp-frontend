@@ -10,9 +10,10 @@ function App() {
       <div className='flex'>
         <div className='hidden sm:flex flex-col border-r border-r-slate-600 w-56 justify-between' style={{ height: "calc(100vh - 2.5rem)" }}>
           <img src='https://www.uzh.ch/docroot/logos/uzh_logo_e_pos.svg' alt='UZH Logo' className='w-full h-24 p-6 border-b-slate-600 border-b' />
-          <div className='flex p-6'>
+          <div className='p-6'>
             <p className='text-sm'>This application has been developed for research purposes.
               Data entered will be recorded and used to improve the prediction model.</p>
+              <small>&copy; 2023 {["Tarek Alakmeh", "Amos Calamida", "Joel Rüttimann"].sort(() => Math.random() - 0.5).join(', ')}</small>
           </div>
         </div>
         <div className='flex-auto flex-col flex w-full '>
