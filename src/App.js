@@ -19,7 +19,7 @@ function App() {
         <div className='flex-auto flex-col flex w-full '>
           <div className='border-b-slate-600 border-b p-4  h-24 flex justify-between items-center'>
             <img src='https://www.uzh.ch/docroot/logos/uzh_logo_e_pos.svg' alt='UZH Logo' className='h-10 visible md:hidden' />
-            <p className='text-xl md:text-2xl font-medium '>Swiss German Dialects</p>
+            <p className='text-xl md:text-2xl font-medium'>Swiss German Dialects</p>
           </div>
           <div className='flex p-6 place-items-center w-full'>
             <MainContent />
