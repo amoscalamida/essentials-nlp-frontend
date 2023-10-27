@@ -4,7 +4,7 @@ import { BlobsModern } from './Blobs';
 
 import axios, { AxiosError } from 'axios';
 
-const codespaceContainer = "sturdy-space-invention-5vq9px9r969fvx7"
+// const codespaceContainer = "sturdy-space-invention-5vq9px9r969fvx7"
 // const backendUrl = process.env.API_URL == null ? `https://${codespaceContainer}-5000.app.github.dev` : process.env.API_URL;
 const backendUrl = "https://clownfish-app-xnr6n.ondigitalocean.app/"
 function MainContent() {

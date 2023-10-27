@@ -1,70 +1,78 @@
-# Getting Started with Create React App
+# Swiss German Dialect Detection: Front End
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The "Swiss German Dialect Detection" is a project as part of the "Essentials of Text and Speech Processing" course in the autumn semester 2023 at the University of Zurich. The project aims to detect Swiss German dialects based on user input. This README will guide you on setting up and running the front end part of the project, provide an overview of its main functions.
 
-## Available Scripts
+## Table of Contents
+- [Usage](#usage)
+- [Project Overview](#project-overview)
+- [Deploying the project](#deploying-the-project)
+- [Contributing](#contributing)
+- [License](#license)
 
-In the project directory, you can run:
 
-### `npm start`
+## Usage
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+To use the "Swiss German Dialect Detection" application, follow these steps:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+1. Open the deployed web application in your browser by navigating to [seashell-app-xnkoa.ondigitalocean.app](https://seashell-app-xnkoa.ondigitalocean.app/) or deploy your own version of the repo (see section [Deploying the project](#deploying-the-project)) and open it on your local machine (port 3000).
 
-### `npm test`
+2. Enter the text in the input form and ensure it is meaningful for dialect prediction.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+3. Click the "Ask the AI" button to start the prediction process.
 
-### `npm run build`
+4. The application will go through the thinking stage, and once complete, it will display the predicted dialect and a certainty score.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+5. If you agree with the prediction, you can confirm it. If you believe the prediction is incorrect, you can provide feedback and select the correct dialect.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+6. The feedback is used to improve the model's accuracy.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Project Component Overview
 
-### `npm run eject`
+The "Swiss German Dialect Detection" project is a react-based application that detects Swiss German dialects based on user input. This repository contains the front end code which provides an intuitive interface for users to input text. When a back end is also deployed, the server side system analyzes the text to predict the dialect spoken. The front end project includes the following main components:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+1. **Input Form**: Users can enter text to be analyzed to predict the Swiss German dialect they might be speaking.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+2. **Thinking Stage**: This stage shows a processing animation while the system analyzes the input.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+3. **Result Stage**: After processing, the system displays the predicted dialect along with a certainty score. Users can confirm the prediction or provide feedback if they believe the prediction is incorrect.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+The project also features a dynamic background with animated blobs and provides user-friendly feedback during the process.
 
-## Learn More
+## Deploying the project
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+<blockquote>In order to have a working application you will need to also follow the steps outlined in <a href="https://github.com/amoscalamida/essentials-nlp-backend.git">amoscalamida/essentials-nlp-backend</a> to deploy a back end instance.</blockquote>
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
+Follow these steps to get the front-end project up and running:
 
-### Code Splitting
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/amoscalamida/essentials-nlp-frontend.git
+   ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+2. Navigate to the project directory:
+   ```bash
+   cd essentials-nlp-frontend
+   ```
 
-### Analyzing the Bundle Size
+3. Install the required dependencies:
+   ```bash
+   npm install
+   ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+4. Set up the backend URL by modifying the `backendUrl` variable in the `MainContent.js` file. Make sure it points to your backend server.
 
-### Making a Progressive Web App
+5. Start the development server:
+   ```bash
+   npm start
+   ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+6. Access the project by opening a web browser and visiting `http://localhost:3000` (or the specified URL if you've configured it differently).
 
-### Advanced Configuration
+Now, the project should be up and running, and you can interact with it in your web browser.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## License
 
-### Deployment
+This project is open-source and available under the MIT License. See the [LICENSE](LICENSE) file for more details.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Please feel free to reach out if you have any questions or need further assistance with the project.
