@@ -1,12 +1,15 @@
 import './dist/output.css';
 import MainContent from './MainContent';
-
+import { useState } from 'react';
 function App() {
 
-  const showCopyRightOnMobile = () => {
-   // Popoup
+  const [copyrightWasShown, setCopyRight]  = useState(false);
 
-   const content = document.createElement('div');
+  const showCopyRightOnMobile = () => {
+    // Popoup
+    setCopyRight(true);
+
+    const content = document.createElement('div');
     content.innerHTML = `
     <div class="fixed z-50 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
       <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -52,6 +55,7 @@ function App() {
 
   }
 
+
   return (
     <div className='bg-sand-500'>
       <p className='py-2 px-4 hidden md:block md:text-right text-center border-b border-b-slate-600 text-sm font-medium'>
@@ -71,9 +75,13 @@ function App() {
             <img src='https://www.uzh.ch/docroot/logos/uzh_logo_e_pos.svg' alt='UZH Logo' className='h-10 visible md:hidden' />
             <p className='text-xl md:text-2xl font-medium flex flex-row gap-1'>Swiss German Dialects
               <button onClick={showCopyRightOnMobile} className='inline md:hidden p-0 text-black rounded-full'>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                
+                <span class="relative flex h-4 w-4">
+                  <span className="absolute animate-ping inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="relative inline-flex h-4 w-4">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
                 </svg>
+                </span>
               </button>
             </p>
 
