@@ -3,17 +3,17 @@
   "name": "Swiss German Dialects",
   "icons": [
     {
-      "src": "favicon.ong",
+      "src": "favicon.jpeg",
       "sizes": "50x50",
       "type": "image/x-icon"
     },
     {
-      "src": "logo_192.png",
+      "src": "logo_192.jpeg",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "logo_512.png",
+      "src": "logo_512.jpeg",
       "type": "image/png",
       "sizes": "512x512"
     }
